@@ -29,7 +29,7 @@ canvas{background:#1d2030;border:3px solid #4d7cff;max-width:100%;touch-action:n
 #adminBtn{display:none;background:#a32636}#adminPanel{display:none;position:fixed;inset:4%;z-index:40;overflow:auto;background:#121827;border:2px solid #ff4545;border-radius:14px;padding:14px;text-align:left;box-shadow:0 0 0 9999px #000b}#adminPanel input{width:min(100%,360px)}#adminRows{margin-top:10px}.arow{display:flex;align-items:center;flex-wrap:wrap;gap:5px;border-bottom:1px solid #ffffff22;padding:7px}.arow button{font-size:12px;padding:5px 8px;margin:1px}.admin-tag{color:#ff4a4a;font-weight:900}
 @media(max-width:760px) and (orientation:portrait){#fgame.s.on #fc{width:100vh;height:100vw;left:100vw;top:0;transform:rotate(90deg);transform-origin:top left}#fgbar{transform:rotate(90deg);transform-origin:top left;left:calc(100vw - 8px);top:8px}#joy{left:12px;bottom:12px;width:105px;height:105px}#knob{left:32px;top:32px}#shb{width:78px;height:78px;line-height:72px;font-size:29px;right:12px;bottom:15px}}
 </style></head><body>
-<button id="voiceBtn" onclick="toggleVoice()" style="position:fixed;top:48px;right:8px;padding:6px 10px;font-size:14px;z-index:9;background:#7b3fe4">🎙️ Sesli Sohbet: Kapalı</button><div id="voiceStatus" style="position:fixed;top:84px;right:8px;z-index:9;background:#0009;padding:5px 8px;border-radius:8px;font-size:12px;max-width:220px">Mikrofon kapalı</div><button id="mt" onclick="togMute()" style="position:fixed;top:6px;right:8px;padding:4px 10px;font-size:18px;z-index:9">🔊</button><div id="tt" style="position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:#000b;padding:8px 14px;border-radius:8px;display:none;z-index:9"></div><button id="frToggle" onclick="toggleFriends()">👥 Arkadaşlar</button><div id="fr"><button onclick="toggleFriends()" style="float:right;background:#333;padding:3px 8px;margin:0">✕ Gizle</button><h3>👥 Arkadaşlar</h3><div id="fl"></div><input id="fi" placeholder="Kullanıcı adı"><button onclick="addF()">Ekle</button><h3>📩 İstekler</h3><div id="rl"></div><h3>⚔️ Düello davetleri</h3><div id="dll"></div></div><div id="on">Çevrimiçi: 1</div>
+<button id="voiceBtn" onclick="toggleVoice()" style="position:fixed;top:48px;left:10px;padding:6px 10px;font-size:14px;z-index:9;background:#7b3fe4">🎙️ Sesli Sohbet: Kapalı</button><div id="voiceStatus" style="position:fixed;top:84px;left:10px;z-index:9;background:#0009;padding:5px 8px;border-radius:8px;font-size:12px;max-width:220px">Mikrofon kapalı</div><button id="mt" onclick="togMute()" style="position:fixed;top:6px;right:8px;padding:4px 10px;font-size:18px;z-index:9">🔊</button><div id="tt" style="position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:#000b;padding:8px 14px;border-radius:8px;display:none;z-index:9"></div><button id="frToggle" onclick="toggleFriends()">👥 Arkadaşlar</button><div id="fr"><button onclick="toggleFriends()" style="float:right;background:#333;padding:3px 8px;margin:0">✕ Gizle</button><h3>👥 Arkadaşlar</h3><div id="fl"></div><input id="fi" placeholder="Kullanıcı adı"><button onclick="addF()">Ekle</button><h3>📩 İstekler</h3><div id="rl"></div><h3>⚔️ Düello davetleri</h3><div id="dll"></div></div><div id="on">Çevrimiçi: 1</div>
 
 <div id="auth" class="s on"><h1>⚔️ Top Savaşı</h1>
 <input id="u" placeholder="Kullanıcı adı"><br><input id="p" type="password" placeholder="Şifre"><br>
@@ -133,27 +133,30 @@ const HE=['','👑','🎩','🤠','🧢','🎓','🪖','👒','🎅','🌸','','
 function remImg(){prof.img=null;pv.src=ball($('cl').value)}
 function saveC(){const d=ensureEconomy(U()[me]);const w=$('wp').value,h=+$('ht').value;if(!d.ownedWeapons.includes(w))return toast('Bu silahı önce marketten satın al');if(!d.ownedHats.includes(h))return toast('Bu şapkayı önce marketten satın al');prof={name:$('nm').value.trim()||me,w,c:$('cl').value,img:prof.img,h};upd(d=>{d.c=prof});menu()}
 // ---- ağ: hub (çevrimiçi sayısı, arkadaş, eşleşme) ----
-const HUB='cbk-hub-topsavasi-v1';
-let P,HB,hc,conn,host=false,tm,G=null,myId,online={},searching=false,hosting=false,pd=null,duelIn=[],UH={},Q=[],ROOMS={},pgT,myMs=0,rooms=[];
+const HUB='cbk-hub-topsavasi-v2';
+let P,HB,hc,conn,host=false,tm,G=null,myId,online={},searching=false,hosting=false,pd=null,duelIn=[],UH={},Q=[],ROOMS={},pgT,myMs=0,rooms=[],lastPn=0,hubSweepT,MAPSH={},DELS={};
 const D=()=>U()[me];
 function toast(t){const e=$('tt');e.textContent=t;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',3500)}
-function netStop(){closeVoiceCalls();clearInterval(pgT);FB=null;searching=false;hosting=false;clearTimeout(tm);try{P&&P.destroy();HB&&HB.destroy()}catch(e){}P=HB=hc=conn=null;online={};duelIn=[];$('on').textContent='Çevrimiçi: –'}
-function netInit(){netStop();$('on').textContent='Çevrimiçi: 1';if(typeof Peer=='undefined')return;clearInterval(pgT);pgT=setInterval(()=>sendHub({t:'pg',ts:Date.now()}),5000);P=new Peer();
+function netStop(){closeVoiceCalls();clearInterval(pgT);clearInterval(hubSweepT);FB=null;searching=false;hosting=false;clearTimeout(tm);try{P&&P.destroy();HB&&HB.destroy()}catch(e){}P=HB=hc=conn=null;online={};duelIn=[];$('on').textContent='Çevrimiçi: –'}
+function netInit(){netStop();$('on').textContent='Çevrimiçi: 1';if(typeof Peer=='undefined')return;clearInterval(pgT);pgT=setInterval(()=>{if(!P||P.destroyed)return;if(P.disconnected){try{P.reconnect()}catch(e){}}if(!hc){hubJoin();return}if(!hc.open)return;if(Date.now()-lastPn>20000){const c=hc;hc=null;online={};$('on').textContent='Çevrimiçi: 1';try{c.close()}catch(e){}setTimeout(hubJoin,300);return}sendHub({t:'pg',ts:Date.now()})},5000);P=new Peer();
  P.on('open',id=>{myId=id;hubJoin()});setupVoicePeer();
- P.on('error',e=>{if(e.type=='peer-unavailable'&&/cbk-hub/.test(e.message||''))becomeHub()});
+ P.on('error',e=>{if(e.type=='peer-unavailable'&&/cbk-hub/.test(e.message||''))becomeHub();else if(e.type!='peer-unavailable')setTimeout(()=>{try{if(P&&!P.destroyed&&P.disconnected)P.reconnect()}catch(x){}},2000)});
  P.on('disconnected',()=>{try{P.reconnect()}catch(x){}});
  P.on('connection',gameIn)}
-function becomeHub(){if(HB||!P)return;setTimeout(()=>{if(HB||!P)return;HB=new Peer(HUB);HB.on('open',()=>{hubRun();setTimeout(hubJoin,300)});HB.on('error',()=>{try{HB.destroy()}catch(e){}HB=null;setTimeout(hubJoin,800+Math.random()*1000)})},Math.random()*700)}
+function becomeHub(){if(HB||!P)return;setTimeout(()=>{if(HB||!P)return;HB=new Peer(HUB);HB.on('open',()=>{hubRun();setTimeout(hubJoin,300)});HB.on('disconnected',()=>{try{HB&&HB.reconnect()}catch(e){}});HB.on('error',e=>{if(e&&e.type&&e.type!='unavailable-id'){try{HB.reconnect()}catch(x){}return}try{HB.destroy()}catch(x){}HB=null;setTimeout(hubJoin,800+Math.random()*1000)})},Math.random()*700)}
 function hubJoin(){if(!me||!P||P.destroyed||(hc&&hc.open))return;const c=hc=P.connect(HUB,{reliable:true});
- c.on('open',()=>{c.send({t:'reg',n:me,id:myId});if(searching)c.send({t:'q'});if(FB&&FB.host)c.send({t:'rc',r:roomInfo()})});
+ const to=setTimeout(()=>{if(hc===c&&!c.open){hc=null;try{c.close()}catch(e){}setTimeout(hubJoin,800+Math.random()*1200)}},8000);
+ c.on('open',()=>{clearTimeout(to);lastPn=Date.now();c.send({t:'reg',n:me,id:myId});if(searching)c.send({t:'q'});if(FB&&FB.host)c.send({t:'rc',r:roomInfo()});mapsPublish()});
+ c.on('error',()=>{clearTimeout(to);if(hc===c){hc=null;setTimeout(hubJoin,1000+Math.random()*1500)}});
  c.on('data',onHub);
  c.on('close',()=>{if(hc===c){hc=null;online={};$('on').textContent='Çevrimiçi: 1';setTimeout(hubJoin,500+Math.random()*1500)}})}
 function sendHub(m){if(hc&&hc.open)hc.send(m)}
 // hub rolü: ilk giren kişinin tarayıcısı, çıkarsa bir başkası devralır
-function hubRun(){UH={};Q=[];ROOMS={};
+function hubRun(){UH={};Q=[];ROOMS={};MAPSH={};DELS={};clearInterval(hubSweepT);hubSweepT=setInterval(hubSweep,8000);
  HB.on('connection',c=>{
-  c.on('data',m=>{
-   if(m.t=='reg'){UH[m.n]={c,id:m.id};c.nm=m.n;bc();c.send({t:'rl',r:Object.values(ROOMS)})}
+  c.ts=Date.now();c.on('data',m=>{c.ts=Date.now();
+   if(m.t=='reg'){UH[m.n]={c,id:m.id};c.nm=m.n;bc();c.send({t:'rl',r:Object.values(ROOMS)});c.send({t:'ml',l:Object.values(MAPSH),d:Object.keys(DELS)})}
+   else if(m.t=='mp'&&c.nm){let ch=0;(Array.isArray(m.d)?m.d:[]).slice(0,200).forEach(id=>{if(typeof id!='string'||!/^cm_[a-z0-9]+$/i.test(id)||DELS[id])return;const x=MAPSH[id];if(x&&x.by!==c.nm)return;DELS[id]=1;delete MAPSH[id];ch=1});(Array.isArray(m.l)?m.l:[]).slice(0,60).forEach(x=>{if(!x||typeof x.id!='string'||!/^cm_[a-z0-9]+$/i.test(x.id)||DELS[x.id]||MAPSH[x.id]||Object.keys(MAPSH).length>=300)return;MAPSH[x.id]={id:x.id,name:String(x.name||'Map').slice(0,24),map:x.map,by:String(x.by||c.nm).slice(0,20)};ch=1});if(ch)bcm()}
    else if(m.t=='q'&&c.nm){Q=Q.filter(n=>n!=c.nm);Q.push(c.nm);pair()}
    else if(m.t=='uq')Q=Q.filter(n=>n!=c.nm);
    else if(m.t=='rc'&&c.nm){ROOMS[c.nm]={...m.r,h:c.nm};bcr()}
@@ -164,11 +167,13 @@ function hubRun(){UH={};Q=[];ROOMS={};
   c.on('close',()=>{if(c.nm&&UH[c.nm]&&UH[c.nm].c===c){delete UH[c.nm];Q=Q.filter(n=>n!=c.nm);delete ROOMS[c.nm];bc();bcr()}})})}
 function bc(){const l={};for(const n in UH)l[n]=UH[n].id;for(const n in UH)if(UH[n].c.open)UH[n].c.send({t:'cnt',l})}
 function pair(){while(Q.length>=2){const a=Q.shift(),b=Q.shift();if(!UH[a]||!UH[b]){if(UH[a])Q.unshift(a);if(UH[b])Q.unshift(b);continue}UH[a].c.send({t:'mh',p:b});UH[b].c.send({t:'mj',p:a,id:UH[a].id})}}
+function bcm(){const l=Object.values(MAPSH),d=Object.keys(DELS);for(const n in UH)if(UH[n].c.open)UH[n].c.send({t:'ml',l,d})}
+function hubSweep(){if(!HB)return;const now=Date.now();let ch=0;for(const n in UH){const c=UH[n].c;if(!c.open||now-(c.ts||now)>40000){try{c.close()}catch(e){}delete UH[n];Q=Q.filter(x=>x!=n);delete ROOMS[n];ch=1}}if(ch){bc();bcr()}}
 function bcr(){const r=Object.values(ROOMS);for(const n in UH)if(UH[n].c.open)UH[n].c.send({t:'rl',r})}
-function onHub(m){
+function onHub(m){lastPn=Date.now();
  if(m.t=='cnt'){const po=(D().po||[]);for(const n in m.l)if(!(n in online)&&po.includes(n))fsend(n,'fr');online=m.l;$('on').textContent='Çevrimiçi: '+Object.keys(online).length;refreshFr();if(voiceEnabled)connectVoiceToOnline()}
  else if(m.t=='f')onF(m.from,m.m);
- else if(m.t=='rl'){rooms=m.r;fRooms()}else if(m.t=='pn'){myMs=Date.now()-m.ts;hubRoomUpd()}
+ else if(m.t=='rl'){rooms=m.r;fRooms()}else if(m.t=='pn'){myMs=Date.now()-m.ts;hubRoomUpd()}else if(m.t=='ml')mapsRecv(m.l,m.d)
  else if(m.t=='mh'&&searching){hostWait()}
  else if(m.t=='mj'&&searching){joinGame(m.id)}}
 
@@ -366,13 +371,23 @@ function end(win,dc){if(G.done)return;G.done=1;cancelAnimationFrame(raf);musStop
 // ---- FUTBOL (demo) ----
 const MAPS={s:{W:640,H:320,gh:100,gd:26,sp:125,bs:100,gr:0,fr:50,rx:27,bx:73,grass:'#2e7d3a',line:'#ffffff',bc:'#ffffff'},b:{W:1000,H:500,gh:140,gd:30,sp:140,bs:100,gr:0,fr:50,rx:27,bx:73,grass:'#2e7d3a',line:'#ffffff',bc:'#ffffff'}},PR=15,BR=6,SHOT=250,KR=4,ZM=[1,1.25,1.55,1.95];
 const CUSTOM_MAPS=()=>{try{return JSON.parse(localStorage.cbkMaps||'[]')}catch(e){return[]}};
-function loadCustomMaps(){CUSTOM_MAPS().forEach(m=>MAPS[m.id]=m.map);const sel=$('frm');if(sel)CUSTOM_MAPS().forEach(m=>{if(![...sel.options].some(o=>o.value===m.id)){const o=document.createElement('option');o.value=m.id;o.textContent='🗺️ '+m.name;sel.appendChild(o)}})}
+function SHARED_MAPS(){try{const a=JSON.parse(localStorage.cbkMapsShared||'[]');return Array.isArray(a)?a:[]}catch(e){return[]}}
+function MAP_TOMBS(){try{const a=JSON.parse(localStorage.cbkMapsDel||'[]');return Array.isArray(a)?a:[]}catch(e){return[]}}
+function ALL_MAPS(){const o=CUSTOM_MAPS().map(m=>({...m,own:1})),ids=new Set(o.map(m=>m.id));return o.concat(SHARED_MAPS().filter(m=>!ids.has(m.id)))}
+function cleanMap(m){if(!m||typeof m!='object')return null;const n=(v,a,b,d)=>{v=+v;return Number.isFinite(v)?Math.max(a,Math.min(b,v)):d},c=(v,d)=>/^#[0-9a-f]{6}$/i.test(v)?v:d;return{W:n(m.W,400,1800,800),H:n(m.H,250,900,450),gh:n(m.gh,50,250,120),gd:n(m.gd,10,100,30),sp:n(m.sp,30,400,125),bs:n(m.bs,10,300,100),gr:n(m.gr,-500,500,0),fr:n(m.fr,10,100,50),rx:n(m.rx,5,45,27),bx:n(m.bx,55,95,73),grass:c(m.grass,'#2e7d3a'),line:c(m.line,'#ffffff'),bc:c(m.bc,'#ffffff')}}
+function mapTomb(id){const t=MAP_TOMBS();if(!t.includes(id))t.push(id);localStorage.cbkMapsDel=JSON.stringify(t.slice(-200));localStorage.cbkMapsShared=JSON.stringify(SHARED_MAPS().filter(x=>x.id!==id));sendHub({t:'mp',l:[],d:[id]})}
+function mapsPublish(){const l=ALL_MAPS().slice(0,60).map(m=>({id:m.id,name:m.name,map:m.map,by:m.by||me}));sendHub({t:'mp',l,d:MAP_TOMBS()})}
+function mapsRecv(l,d){const tb=MAP_TOMBS(),own=new Set(CUSTOM_MAPS().map(m=>m.id));let sh=SHARED_MAPS(),chg=0;
+ (Array.isArray(d)?d:[]).forEach(id=>{if(typeof id!='string'||!/^cm_[a-z0-9]+$/i.test(id)||own.has(id))return;if(!tb.includes(id)){tb.push(id);chg=1}if(sh.some(x=>x.id===id)){sh=sh.filter(x=>x.id!==id);chg=1}if(MAPS[id]){delete MAPS[id];chg=1}});
+ (Array.isArray(l)?l:[]).forEach(m=>{if(!m||typeof m.id!='string'||!/^cm_[a-z0-9]+$/i.test(m.id)||tb.includes(m.id)||own.has(m.id)||sh.some(x=>x.id===m.id)||sh.length>=100)return;const cm=cleanMap(m.map);if(!cm)return;sh.push({id:m.id,name:String(m.name||'Map').slice(0,24),map:cm,by:String(m.by||'').slice(0,20)});chg=1});
+ if(chg){localStorage.cbkMapsDel=JSON.stringify(tb.slice(-200));localStorage.cbkMapsShared=JSON.stringify(sh);loadCustomMaps();if($('mapedit').style.display!='none')renderSavedMaps()}}
+function loadCustomMaps(){const all=ALL_MAPS();all.forEach(m=>MAPS[m.id]=m.map);const sel=$('frm');if(sel){const ids=new Set(all.map(m=>m.id));[...sel.options].filter(o=>/^cm_/.test(o.value)&&!ids.has(o.value)).forEach(o=>o.remove());all.forEach(m=>{if(![...sel.options].some(o=>o.value===m.id)){const o=document.createElement('option');o.value=m.id;o.textContent='🗺️ '+m.name+(m.own?'':' · '+(m.by||''));sel.appendChild(o)}})}}
 function mapEditorOpen(){$('mapedit').style.display='block';loadCustomMaps();renderSavedMaps();mapPreview()}
 function mapEditorClose(){$('mapedit').style.display='none'}
 function mapDataFromForm(){const n=id=>+$(id).value;return{W:Math.max(400,Math.min(1800,n('meW')||800)),H:Math.max(250,Math.min(900,n('meH')||450)),gh:Math.max(50,Math.min(250,n('meGh')||120)),gd:Math.max(10,Math.min(100,n('meGd')||30)),sp:Math.max(30,Math.min(400,n('meSp')||125)),bs:Math.max(10,Math.min(300,n('meBs')||100)),gr:Math.max(-500,Math.min(500,n('meGr')||0)),fr:Math.max(10,Math.min(100,n('meFr')||50)),rx:Math.max(5,Math.min(45,n('meRX')||27)),bx:Math.max(55,Math.min(95,n('meBX')||73)),grass:$('meGrass').value,line:$('meLine').value,bc:$('meBall').value}}
 function mapPreview(){const m=mapDataFromForm(),c=$('mapPreviewCanvas').getContext('2d'),w=c.canvas.width,h=c.canvas.height;c.clearRect(0,0,w,h);c.fillStyle=m.grass;c.fillRect(0,0,w,h);c.strokeStyle=m.line;c.lineWidth=3;c.strokeRect(2,2,w-4,h-4);c.beginPath();c.moveTo(w/2,0);c.lineTo(w/2,h);c.stroke();c.beginPath();c.arc(w/2,h/2,h*.17,0,7);c.stroke();const gh=m.gh/m.H*h,gd=m.gd/m.W*w,top=(h-gh)/2;c.strokeRect(-gd,top,gd,gh);c.strokeRect(w,top,gd,gh);c.fillStyle='#ff4545';c.beginPath();c.arc(m.rx/100*w,h/2,12,0,7);c.fill();c.fillStyle='#4385ff';c.beginPath();c.arc(m.bx/100*w,h/2,12,0,7);c.fill();c.fillStyle=m.bc;c.beginPath();c.arc(w/2,h/2,6,0,7);c.fill()}
-function mapSave(){const name=$('meName').value.trim();if(!name){toast('Map için isim yaz');return}const id='cm_'+Date.now().toString(36),m=mapDataFromForm();const all=CUSTOM_MAPS();all.push({id,name,map:m});localStorage.cbkMaps=JSON.stringify(all);MAPS[id]=m;const o=document.createElement('option');o.value=id;o.textContent='🗺️ '+name;$('frm').appendChild(o);renderSavedMaps();toast('Map kaydedildi: '+name)}
-function renderSavedMaps(){const e=$('mapSaved');if(!e)return;e.innerHTML='';CUSTOM_MAPS().forEach(m=>{const d=document.createElement('div');d.style.cssText='padding:6px;border-bottom:1px solid #ffffff22';const t=document.createElement('span');t.textContent='🗺️ '+m.name+' ';d.appendChild(t);const b=document.createElement('button');b.textContent='Oda kurmada seç';b.onclick=()=>{$('frm').value=m.id;mapEditorClose();toast(m.name+' oda kurma listesinde seçildi')};d.appendChild(b);const del=document.createElement('button');del.textContent='Sil';del.className='g';del.onclick=()=>{localStorage.cbkMaps=JSON.stringify(CUSTOM_MAPS().filter(x=>x.id!==m.id));delete MAPS[m.id];[...$('frm').options].filter(o=>o.value===m.id).forEach(o=>o.remove());renderSavedMaps()};d.appendChild(del);e.appendChild(d)})}
+function mapSave(){const name=$('meName').value.trim();if(!name){toast('Map için isim yaz');return}const id='cm_'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),m=mapDataFromForm();const all=CUSTOM_MAPS();all.push({id,name,map:m,by:me});localStorage.cbkMaps=JSON.stringify(all);MAPS[id]=m;const o=document.createElement('option');o.value=id;o.textContent='🗺️ '+name;$('frm').appendChild(o);renderSavedMaps();toast('Map kaydedildi: '+name);sendHub({t:'mp',l:[{id,name,map:m,by:me}],d:[]})}
+function renderSavedMaps(){const e=$('mapSaved');if(!e)return;e.innerHTML='';ALL_MAPS().forEach(m=>{const d=document.createElement('div');d.style.cssText='padding:6px;border-bottom:1px solid #ffffff22';const t=document.createElement('span');t.textContent='🗺️ '+m.name+(m.own?'':' · '+(m.by||''))+' ';d.appendChild(t);const b=document.createElement('button');b.textContent='Oda kurmada seç';b.onclick=()=>{$('frm').value=m.id;mapEditorClose();toast(m.name+' oda kurma listesinde seçildi')};d.appendChild(b);if(!m.own){e.appendChild(d);return}const del=document.createElement('button');del.textContent='Sil';del.className='g';del.onclick=()=>{localStorage.cbkMaps=JSON.stringify(CUSTOM_MAPS().filter(x=>x.id!==m.id));mapTomb(m.id);delete MAPS[m.id];[...$('frm').options].filter(o=>o.value===m.id).forEach(o=>o.remove());renderSavedMaps()};d.appendChild(del);e.appendChild(d)})}
 loadCustomMaps();
 const CC=(()=>{let r='TR';try{r=((navigator.language||'tr-TR').split('-')[1]||'TR').toUpperCase()}catch(e){}return r})();
 const flag=c=>[...c].map(ch=>String.fromCodePoint(127397+ch.charCodeAt(0))).join('');
